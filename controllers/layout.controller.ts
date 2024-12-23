@@ -4,7 +4,6 @@ import { CatchAsyncError } from "../middleware/catchAsyncErrors";
 import LayoutModel from "../models/layout.model";
 import cloudinary from "cloudinary";
 
-// create layout
 export const createLayout = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -68,7 +67,6 @@ export const createLayout = CatchAsyncError(
   }
 );
 
-// Edit layout
 export const editLayout = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -145,7 +143,6 @@ export const editLayout = CatchAsyncError(
   }
 );
 
-// get layout by type
 export const getLayoutByType = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -6,7 +6,6 @@ import userModel from "../models/user.model";
 import CourseModel from "../models/course.model";
 import OrderModel from "../models/order.Model";
 
-// get users analytics --- only for admin
 export const getUsersAnalytics = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -22,7 +21,6 @@ export const getUsersAnalytics = CatchAsyncError(
   }
 );
 
-// get courses analytics --- only for admin
 export const getCoursesAnalytics = CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -39,7 +37,6 @@ export const getCoursesAnalytics = CatchAsyncError(
   );
   
   
-// get order analytics --- only for admin
 export const getOrderAnalytics = CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) => {
       try {

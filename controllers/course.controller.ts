@@ -4,7 +4,6 @@ import ErrorHandler from "../utils/ErrorHandler";
 import cloudinary from "cloudinary";
 import { createCourse, getAllCoursesService } from "../services/course.service";
 import CourseModel, { IComment } from "../models/course.model";
-// import { redis } from "../utils/redis";
 import mongoose from "mongoose";
 import path from "path";
 import ejs from "ejs";
@@ -12,7 +11,6 @@ import sendMail from "../utils/sendMail";
 import NotificationModel from "../models/notification.Model";
 import axios from "axios";
 
-// upload course
 export const uploadCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -35,7 +33,6 @@ export const uploadCourse = CatchAsyncError(
   }
 );
 
-// edit course
 export const editCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -85,31 +82,19 @@ export const editCourse = CatchAsyncError(
   }
 );
 
-// get single course --- without purchasing
 export const getSingleCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const courseId = req.params.id;
 
-      // const isCacheExist = await redis.get(courseId);
+      const course = await CourseModel.findById(courseId).select(
+        "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
+      );
 
-      // if (isCacheExist) {
-      //   const course = JSON.parse(isCacheExist);
-      //   res.status(200).json({
-      //     success: true,
-      //     course,
-      //   });
-      // } else {
-        const course = await CourseModel.findById(courseId).select(
-          "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-        );
-
-        // await redis.set(courseId, JSON.stringify(course), "EX", 604800); // 7days
-
-        res.status(200).json({
-          success: true,
-          course,
-        });
+      res.status(200).json({
+        success: true,
+        course,
+      });
       // }
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
@@ -117,7 +102,6 @@ export const getSingleCourse = CatchAsyncError(
   }
 );
 
-// get all courses --- without purchasing
 export const getAllCourses = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -135,7 +119,6 @@ export const getAllCourses = CatchAsyncError(
   }
 );
 
-// get course content -- only for valid user
 export const getCourseByUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -166,7 +149,6 @@ export const getCourseByUser = CatchAsyncError(
   }
 );
 
-// add question in course
 interface IAddQuestionData {
   question: string;
   courseId: string;
@@ -192,14 +174,12 @@ export const addQuestion = CatchAsyncError(
         return next(new ErrorHandler("Invalid content id", 400));
       }
 
-      // create a new question object
       const newQuestion: any = {
         user: req.user,
         question,
         questionReplies: [],
       };
 
-      // add this question to our course content
       couseContent.questions.push(newQuestion);
 
       await NotificationModel.create({
@@ -208,7 +188,6 @@ export const addQuestion = CatchAsyncError(
         message: `You have a new question in ${couseContent.title}`,
       });
 
-      // save the updated course
       await course?.save();
 
       res.status(200).json({
@@ -221,7 +200,6 @@ export const addQuestion = CatchAsyncError(
   }
 );
 
-// add answer in course question
 interface IAddAnswerData {
   answer: string;
   courseId: string;
@@ -257,7 +235,6 @@ export const addAnwser = CatchAsyncError(
         return next(new ErrorHandler("Invalid question id", 400));
       }
 
-      // create a new answer object
       const newAnswer: any = {
         user: req.user,
         answer,
@@ -265,13 +242,11 @@ export const addAnwser = CatchAsyncError(
         updatedAt: new Date().toISOString(),
       };
 
-      // add this answer to our course content
       question.questionReplies.push(newAnswer);
 
       await course?.save();
 
       if (req.user?._id === question.user._id) {
-        // create a notification
         await NotificationModel.create({
           user: req.user?._id,
           title: "New Question Reply Received",
@@ -310,7 +285,6 @@ export const addAnwser = CatchAsyncError(
   }
 );
 
-// add review in course
 interface IAddReviewData {
   review: string;
   rating: number;
@@ -324,7 +298,6 @@ export const addReview = CatchAsyncError(
 
       const courseId = req.params.id;
 
-      // check if courseId already exists in userCourseList based on _id
       const courseExists = userCourseList?.some(
         (course: any) => course._id.toString() === courseId.toString()
       );
@@ -354,14 +327,11 @@ export const addReview = CatchAsyncError(
       });
 
       if (course) {
-        course.ratings = avg / course.reviews.length; // one example we have 2 reviews one is 5 another one is 4 so math working like this = 9 / 2  = 4.5 ratings
+        course.ratings = avg / course.reviews.length;
       }
 
       await course?.save();
 
-      // await redis.set(courseId, JSON.stringify(course), "EX", 604800); // 7days
-
-      // create notification
       await NotificationModel.create({
         user: req.user?._id,
         title: "New Review Received",
@@ -379,7 +349,6 @@ export const addReview = CatchAsyncError(
   }
 );
 
-// add reply in review
 interface IAddReviewData {
   comment: string;
   courseId: string;
@@ -419,8 +388,6 @@ export const addReplyToReview = CatchAsyncError(
       
       await course?.save();
 
-      // await redis.set(courseId, JSON.stringify(course), "EX", 604800); // 7days
-
       res.status(200).json({
         success: true,
         course,
@@ -431,7 +398,6 @@ export const addReplyToReview = CatchAsyncError(
   }
 );
 
-// get all courses --- only for admin
 export const getAdminAllCourses = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -442,7 +408,6 @@ export const getAdminAllCourses = CatchAsyncError(
   }
 );
 
-// Delete Course --- only for admin
 export const deleteCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -456,8 +421,6 @@ export const deleteCourse = CatchAsyncError(
 
       await course.deleteOne({ id });
 
-      // await redis.del(id);
-
       res.status(200).json({
         success: true,
         message: "course deleted successfully",
@@ -468,7 +431,6 @@ export const deleteCourse = CatchAsyncError(
   }
 );
 
-// generate video url
 export const generateVideoUrl = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {

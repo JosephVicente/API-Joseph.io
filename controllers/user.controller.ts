@@ -16,7 +16,6 @@ import {
 } from "../services/user.service";
 import cloudinary from "cloudinary";
 
-// register user
 interface IRegistrationBody {
   name: string;
   email: string;
@@ -94,7 +93,6 @@ export const createActivationToken = (user: any): IActivationToken => {
   return { token, activationCode };
 };
 
-// activate user
 interface IActivationRequest {
   activation_token: string;
   activation_code: string;
@@ -137,7 +135,6 @@ export const activateUser = CatchAsyncError(
   }
 );
 
-// Login user
 interface ILoginRequest {
   email: string;
   password: string;
@@ -169,14 +166,12 @@ export const loginUser = CatchAsyncError(
   }
 );
 
-// logout user
 export const logoutUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.cookie("access_token", "", { maxAge: 1 });
       res.cookie("refresh_token", "", { maxAge: 1 });
       const userId = req.user?._id || "";
-      // redis.del(userId);
       res.status(200).json({
         success: true,
         message: "Logged out successfully",
@@ -187,7 +182,6 @@ export const logoutUser = CatchAsyncError(
   }
 );
 
-// update access token
 export const updateAccessToken = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -201,20 +195,6 @@ export const updateAccessToken = CatchAsyncError(
       if (!decoded) {
         return next(new ErrorHandler(message, 400));
       }
-      // const session = await redis.get(decoded.id as string);
-
-      // if (!session) {
-      //   return next(
-      //     new ErrorHandler("Please login for access this resources!", 400)
-      //   );
-      // }
-
-      // const user = JSON.parse(session);
-
-      // req.user = user;
-
-      // await redis.set(user._id, JSON.stringify(user), "EX", 604800); // 7days
-
       return next();
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
@@ -222,7 +202,6 @@ export const updateAccessToken = CatchAsyncError(
   }
 );
 
-// get user info
 export const getUserInfo = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -240,7 +219,6 @@ interface ISocialAuthBody {
   avatar: string;
 }
 
-// social auth
 export const socialAuth = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -258,7 +236,6 @@ export const socialAuth = CatchAsyncError(
   }
 );
 
-// update user info
 interface IUpdateUserInfo {
   name?: string;
   email?: string;
@@ -278,8 +255,6 @@ export const updateUserInfo = CatchAsyncError(
 
       await user?.save();
 
-      // await redis.set(userId, JSON.stringify(user));
-
       res.status(201).json({
         success: true,
         user,
@@ -290,7 +265,6 @@ export const updateUserInfo = CatchAsyncError(
   }
 );
 
-// update user password
 interface IUpdatePassword {
   oldPassword: string;
   newPassword: string;
@@ -321,8 +295,6 @@ export const updatePassword = CatchAsyncError(
 
       await user.save();
 
-      // await redis.set(req.user?._id, JSON.stringify(user));
-
       res.status(201).json({
         success: true,
         user,
@@ -337,7 +309,6 @@ interface IUpdateProfilePicture {
   avatar: string;
 }
 
-// update profile picture
 export const updateProfilePicture = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -348,9 +319,7 @@ export const updateProfilePicture = CatchAsyncError(
       const user = await userModel.findById(userId).select("+password");
 
       if (avatar && user) {
-        // if user have one avatar then call this if
         if (user?.avatar?.public_id) {
-          // first delete the old image
           await cloudinary.v2.uploader.destroy(user?.avatar?.public_id);
 
           const myCloud = await cloudinary.v2.uploader.upload(avatar, {
@@ -375,8 +344,6 @@ export const updateProfilePicture = CatchAsyncError(
 
       await user?.save();
 
-      // await redis.set(userId, JSON.stringify(user));
-
       res.status(200).json({
         success: true,
         user,
@@ -388,7 +355,6 @@ export const updateProfilePicture = CatchAsyncError(
   }
 );
 
-// get all users --- only for admin
 export const getAllUsers = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -399,7 +365,6 @@ export const getAllUsers = CatchAsyncError(
   }
 );
 
-// update user role --- only for admin
 export const updateUserRole = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -420,7 +385,6 @@ export const updateUserRole = CatchAsyncError(
   }
 );
 
-// Delete user --- only for admin
 export const deleteUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -433,8 +397,6 @@ export const deleteUser = CatchAsyncError(
       }
 
       await user.deleteOne({ id });
-
-      // await redis.del(id);
 
       res.status(200).json({
         success: true,

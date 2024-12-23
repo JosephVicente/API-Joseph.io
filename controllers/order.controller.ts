@@ -9,11 +9,9 @@ import ejs from "ejs";
 import sendMail from "../utils/sendMail";
 import NotificationModel from "../models/notification.Model";
 import { getAllOrdersService, newOrder } from "../services/order.service";
-// import { redis } from "../utils/redis";
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-// create order
 export const createOrder = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -89,8 +87,6 @@ export const createOrder = CatchAsyncError(
 
       user?.courses.push(course?._id);
 
-      // await redis.set(req.user?._id, JSON.stringify(user));
-
       await user?.save();
 
       await NotificationModel.create({
@@ -110,7 +106,6 @@ export const createOrder = CatchAsyncError(
   }
 );
 
-// create order for mobile
 export const createMobileOrder = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -172,8 +167,6 @@ export const createMobileOrder = CatchAsyncError(
 
       user?.courses.push(course?._id);
 
-      // await redis.set(req.user?._id, JSON.stringify(user));
-
       await user?.save();
 
       await NotificationModel.create({
@@ -193,7 +186,6 @@ export const createMobileOrder = CatchAsyncError(
   }
 );
 
-// get All orders --- only for admin
 export const getAllOrders = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -204,7 +196,6 @@ export const getAllOrders = CatchAsyncError(
   }
 );
 
-//  send stripe publishble key
 export const sendStripePublishableKey = CatchAsyncError(
   async (req: Request, res: Response) => {
     res.status(200).json({
@@ -213,15 +204,14 @@ export const sendStripePublishableKey = CatchAsyncError(
   }
 );
 
-// new payment
 export const newPayment = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const myPayment = await stripe.paymentIntents.create({
         amount: req.body.amount,
-        currency: "GBP",
+        currency: "AOA",
         metadata: {
-          company: "E-Learning",
+          company: "Joseph.io",
         },
         automatic_payment_methods: {
           enabled: true,

@@ -3,7 +3,6 @@ import { CatchAsyncError } from "../middleware/catchAsyncErrors";
 import OrderModel from "../models/order.Model";
 
 
-// create new order
 export const newOrder = CatchAsyncError(async(data:any,res:Response) => {
     const order = await OrderModel.create(data);
 
@@ -14,7 +13,6 @@ export const newOrder = CatchAsyncError(async(data:any,res:Response) => {
 
 });
 
-// Get All Orders
 export const getAllOrdersService = async (res: Response) => {
     const orders = await OrderModel.find().sort({ createdAt: -1 });
   
